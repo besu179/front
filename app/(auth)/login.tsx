@@ -7,9 +7,13 @@ export default function LoginScreen() {
     const router = useRouter();
 
     const handleLogin = () => {
+        // 1. Update the global auth state
         signIn();
-        // Router replacement is handled by _layout, but we will leave this in for immediate feedback if needed,
-        // though the layout effect will trigger the redirect.
+
+        // 2. The Root Layout (_layout.tsx) listens to the session change 
+        // and will automatically redirect us to the Home screen.
+        // We replace the route here just for immediate feedback, 
+        // but the layout effect is the real "Guard".
         router.replace('/');
     };
 

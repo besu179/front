@@ -11,13 +11,17 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading) return;
 
+    // segments[0] is the first part of the route processing.
+    // e.g., if we are at '/(auth)/login', segments[0] is '(auth)'
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!session && !inAuthGroup) {
-      // Redirect to login if not authenticated
+      // If user is NOT logged in and trying to access a protected route (not in auth group),
+      // redirect them to the login page.
       router.replace("/login");
     } else if (session && inAuthGroup) {
-      // Redirect to home if already authenticated
+      // If user IS logged in and trying to access the login page,
+      // redirect them to the home page (protected area).
       router.replace("/");
     }
   }, [session, segments, isLoading]);
@@ -30,6 +34,8 @@ function RootLayoutNav() {
     );
   }
 
+  // <Slot /> renders the current route.
+  // We wrap it in the SessionProvider to make auth state available centrally.
   return <Slot />;
 }
 

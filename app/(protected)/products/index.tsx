@@ -20,7 +20,10 @@ export default function ProductsListScreen() {
                 renderItem={({ item }) => (
                     <Pressable
                         style={styles.item}
-                        onPress={() => router.push(`/products/${item.id}`)}
+                        // Programmatic Navigation:
+                        // We push a new route to the stack.
+                        // '/products/1' matches the file app/(protected)/products/[id]/index.tsx
+                        onPress={() => router.push(`/products/${item.id}` as any)}
                     >
                         <Text style={styles.name}>{item.name}</Text>
                         <Text style={styles.price}>{item.price}</Text>

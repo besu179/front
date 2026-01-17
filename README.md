@@ -1,50 +1,102 @@
-# Welcome to your Expo app 👋
+# Mini Shop App - Expo Router Practice
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A learning-focused "Mini Shop" application built to demonstrate advanced navigation patterns with Expo Router.
 
-## Get started
+> **Focus**: Navigation Logic, Authentication Flow, Nested Navigators.
+> **Stack**: React Native, Expo Router.
 
-1. Install dependencies
+---
 
+## 🏗 Project Architecture
+
+The app mimics a real-world structure with two distinct areas, separated by "Groups":
+
+```
+app/
+├── _layout.tsx              # ROOT LAYOUT (Authentication Logic)
+├── _ctx.tsx                 # AUTH CONTEXT (Global State)
+│
+├── (auth)/                  # PUBLIC GROUP (Not logged in)
+│   └── login.tsx            # Login Screen
+│
+└── (protected)/             # PRIVATE GROUP (Logged in)
+    ├── _layout.tsx          # TABS NAVIGATOR
+    ├── index.tsx            # Home Tab
+    ├── profile.tsx          # Profile Tab
+    │
+    └── products/            # PRODUCTS TAB (Nested Stack)
+        ├── _layout.tsx      # STACK NAVIGATOR
+        ├── index.tsx        # Product List
+        └── [id]/index.tsx   # Product Detail (Dynamic Route)
+```
+
+---
+
+## 🧠 Key Concepts & Syntaxes Used
+
+### 1. Route Groups `(...)`
+Directories wrapped in parentheses, like `(auth)` and `(protected)`, are **Route Groups**.
+- **Purpose**: Organize files without affecting the URL path.
+- **Example**: `app/(auth)/login.tsx` is accessed via `/login`, NOT `/auth/login`.
+- **Usage**: We use this to apply different sub-layouts (Tabs for protected, nothing for auth).
+
+### 2. Root Layout & Authentication
+`app/_layout.tsx` is the entry point. It wraps usage of `<Slot />` (the child route) with a Context Provider.
+- **Logic**: It listens to the global `session` state.
+- **Protection**:
+  ```tsx
+  // usage of useSegments() to know where we are
+  const segments = useSegments();
+  
+  // Logic: If not logged in AND not in (auth) group -> Redirect to Login
+  if (!session && segments[0] !== '(auth)') {
+    router.replace('/login');
+  }
+  ```
+
+### 3. Nested Navigators (Tabs + Stack)
+We demonstrated how to nest navigators for complex flows.
+- **Tabs**: Defined in `app/(protected)/_layout.tsx`. Wraps Home, Profile, and Products.
+- **Stack**: Defined in `app/(protected)/products/_layout.tsx`.
+  - The "Products" tab points to the `products/` **folder**.
+  - That folder has its own `_layout (Stack)`, so clicking a product pushes a new screen *within* that tab.
+  - **Trick**: We set `headerShown: false` on the Tab screen so the Stack can show its own header (with the Back button).
+
+### 4. Dynamic Routes `[id]`
+Files wrapped in square brackets capture URL parameters.
+- **File**: `app/(protected)/products/[id]/index.tsx`.
+- **Syntax**:
+  ```tsx
+  import { useLocalSearchParams } from 'expo-router';
+  
+  export default function Detail() {
+    const { id } = useLocalSearchParams(); // Reads '101' from /products/101
+    return <Text>Product {id}</Text>;
+  }
+  ```
+
+### 5. Programmatic Navigation
+We use the `useRouter` hook to move between screens via code.
+- **Syntax**:
+  ```tsx
+  const router = useRouter();
+  router.push('/products/123');   // Push onto stack (Back button works)
+  router.replace('/login');       // Replace history (Back button doesn't work)
+  ```
+
+---
+
+## 🚀 How to Run
+
+1. **Install Dependencies**:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+2. **Start the App**:
    ```bash
    npx expo start
    ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. **Verify Flows**:
+   - Login (Simulated) -> Redirects to Home.
+   - Tabs -> Switch between tabs.
+   - Products -> Click item -> see Dynamic Detail screen.
